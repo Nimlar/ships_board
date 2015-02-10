@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+
+    <title>snap svg</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+<style type="text/css">
+            html, body {
+                height: 100%;
+            }
+            #svg {
+                width: 100%;
+                height: 100%;
+                border: solid 0px ;
+                margin: 0 0;
+                padding: 0 0;
+                background:url("space.jpg")  repeat;
+            }
+        </style>
+  </head>
+  <body >
+  <svg id="svg">
+  <defs></defs>
+  </svg>
+<script type="text/javascript" src="snap.svg-min.js"></script>
+<script>
+
+    function setShips(ships)
+    {
+        var width = document.getElementById('svg').offsetWidth;
+        var height = document.getElementById('svg').offsetHeight;
+        for (var i=0; i<ships.length; i++) {
+            var affiche = function(ship) {
+                return function(e) {
+                    var f=e.select("g"); /* get the internal data of svg */
+                    var color=ship.color;
+                    var x=ship.pos[0]*width;
+                    var y=ship.pos[1]*height;
+                    var angle=Snap.angle(x,y,0,0);
+                    console.log( "" + color + "\nx:"+ ship.pos[0] +" " + x  + "\ny:"+ ship.pos[1] +" "  + y  + "\nangle: "+ angle +"\n" );
+                    f.select("#center").attr({fill: color});
+                    var t=new Snap.Matrix();
+                    t.translate(x, y);
+                    t.rotate(angle,0,0);
+                    f.transform(t);
+                    s.append(f);
+                    //console.log(JSON.stringify(f.getBBox(),null, 4));
+                };
+            };
+            Snap.load("fleche.svg", affiche(ships[i]) );
+        }
+    }
+
+    var s = Snap("#svg");
+     ships=[ { pos : [0,0],    color: "yellow"},
+             { pos : [.5,.5],    color: "red"},
+             { pos : [.4,.5], color: "green"},
+             { pos : [.001,0.83], color: "blue"},
+             { pos : [.03,.83],  color: "gray"} ];
+    setShips(ships);
+//    setShips([ships[0] ]);
+//    setShips([ships[0],ships[1] ]);
+
+function move_all()
+{
+    alaert("ici");
+}
+
+
+</script>
+  <input type="button" value="event" onclick="move_all();"/>
+  </body>
+</html>
