@@ -32,40 +32,47 @@
         var width = document.getElementById('svg').offsetWidth;
         var height = document.getElementById('svg').offsetHeight;
         for (var i=0; i<ships.length; i++) {
-            var affiche = function(ship) {
-                return function(e) {
-                    var f=e.select("g"); /* get the internal data of svg */
-                    var color=ship.color;
-                    var x=ship.pos[0]*width;
-                    var y=ship.pos[1]*height;
-                    var angle=Snap.angle(x,y,0,0);
-                    console.log( "" + color + "\nx:"+ ship.pos[0] +" " + x  + "\ny:"+ ship.pos[1] +" "  + y  + "\nangle: "+ angle +"\n" );
-                    f.select("#center").attr({fill: color});
-                    var t=new Snap.Matrix();
-                    t.translate(x, y);
-                    t.rotate(angle,0,0);
-                    f.transform(t);
-                    s.append(f);
-                    //console.log(JSON.stringify(f.getBBox(),null, 4));
-                };
-            };
-            Snap.load("fleche.svg", affiche(ships[i]) );
+            Snap.load("fleche.svg", function(e) {
+                var f=e.select("g"); /* get the internal data of svg */
+                var color=this.color;
+                var x=this.pos[0]*width;
+                var y=this.pos[1]*height;
+                var angle=Snap.angle(x,y,0,0);
+                console.log( "" + color + "\nx:"+ this.pos[0] +" " + x  + "\ny:"+ this.pos[1] +" "  + y  + "\nangle: "+ angle +"\n" );
+                f.select("#center").attr({fill: color});
+                var t=new Snap.Matrix();
+                t.translate(x, y);
+                t.rotate(angle,0,0);
+                f.transform(t);
+                s.append(f);
+                this.img=f;
+                console.log(JSON.stringify(f.getBBox(),null, 4));
+            }, ships[i] /* will be this in previous function */);
         }
     }
 
     var s = Snap("#svg");
-     ships=[ { pos : [0,0],    color: "yellow"},
+     _ships=[ { pos : [0,0],    color: "yellow"},
              { pos : [.5,.5],    color: "red"},
              { pos : [.4,.5], color: "green"},
              { pos : [.001,0.83], color: "blue"},
              { pos : [.03,.83],  color: "gray"} ];
+//      ships=_ships;
+      ships=[_ships[1]];
+//      ships=[_ships[0],_ships[1]];
     setShips(ships);
-//    setShips([ships[0] ]);
-//    setShips([ships[0],ships[1] ]);
 
 function move_all()
 {
-    alaert("ici");
+    var width = document.getElementById('svg').offsetWidth;
+    var height = document.getElementById('svg').offsetHeight;
+    var t=new Snap.Matrix();
+    t.translate(0.1*width, 0.1*height );
+    for (var i=0; i<ships.length; i++) {
+        ships[i].img.transform(t);
+        console.log(JSON.stringify(ships[i].img.getBBox(),null, 4));
+
+    }
 }
 
 
