@@ -97,7 +97,7 @@ function move_all(){
         ships[i].prev[0]=ships[i].pos[0]
         ships[i].prev[1]=ships[i].pos[1]
         var dest = planets[Math.floor((Math.random() * planets.length))];
-        ships.planet=dest;
+        ships[i].planet=dest;
         ships[i].pos[0]=dest.pos[0]-(dest.size/width);
         ships[i].pos[1]=dest.pos[1]-(dest.size/height);
         move_ship(ships[i]);
@@ -107,24 +107,51 @@ function move_all(){
 function event_one(){
     var width = document.getElementById('svg').offsetWidth;
     var height = document.getElementById('svg').offsetHeight;
+
     var ship = ships[Math.floor((Math.random() * ships.length))]
-    var fobject = '<foreignObject width="80" height="200"><body><p>'+ Math.floor((Math.random() * 2000))+ '</p></body></foreignObject>'
-    var sText = s.text(ships.planet.pos[0]*width, ships.planet.pos[1]*height, Math.floor((Math.random() * 2000))).attr({ fontSize: '100px', "text-anchor": "middle", "fill": ship.color });
-    var timing = 750;
+    var sText = s.text(0, 0, Math.floor((Math.random() * 2000))).attr({ fontSize: '100px', "text-anchor": "middle", "fill": ship.color });
+
+    /* create the path to follow while animation */
+    var p1x,p1y,cx,cy,p2x,p2y;
+    var dx, dy;
+    p1x=ship.planet.pos[0]*width;
+    p1y=ship.planet.pos[1]*height;
+    var bbox=ship.img.getBBox();
+    p2x=bbox.cx;
+    p2y=bbox.cy;
+
+    /* normal calculation : http://stackoverflow.com/questions/1243614/how-do-i-calculate-the-normal-vector-of-a-line-segment */
+    dx=p2x-p1x;
+    dy=p2y-p1y;
+    /* normal vectors are (dy, -dx) and  (-dy, dx) */
+    /* we want the one that go up, so with an y component <=0 */
+    if(dx>=0) {
+        dx=-dx;
+    } else {
+        dy=-dy;
+    }
+    /* the normal vector is the same size as p1 to p2, we want it 4 times bigger so*/
+    cx=p1x+dx/2+ dy* 4
+    cy=p1y+dy/2+ dx* 4
+
+//    var t=s.path("M"+p1x+","+p1y +" Q"+ cx +","+ cy +","+ p2x +","+p2y)
+//    s.append(t);
+    pathStr="M"+ship.planet.pos[0]*width +"," + ship.planet.pos[1]*height +"q10,10,10,10"
+    var timing = 800;
     Snap.animate( 0, 2, function( value ) {
+        var dot = Snap.path.findDotsAtSegment(p1x,p1y,cx,cy,cx,cy,p2x,p2y,value/2);
+        sText.transform('t'+ dot.x +',' + dot.y );
         if (value <1) {
-            sText.transform('t0,' + -20*value );                  // Animate by transform
-            sText.attr({ 'font-size': value * 20,  opacity: value });      // Animate by font-size
+            sText.attr({ 'font-size': value * 10 +10 });      // Animate by font-size
         } else {
-            sText.transform('t0,' + -20*(2-value) );                  // Animate by transform
-            sText.attr({ 'font-size': (2-value) * 20,  opacity: (2-value) });      // Animate by font-size
+            sText.attr({ 'font-size': (2-value) * 10 +10});      // Animate by font-size
         }
     }, timing, mina.elactic, function() { sText.remove() } );
 
 }
 
 move_all();
-event_one();
+//event_one();
 </script>
   <input type="button" value="move" onclick="move_all();"/>
   <input type="button" value="event" onclick="event_one();"/>
