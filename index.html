@@ -45,16 +45,37 @@ function move()
 }
 
 
-    var s = Snap("#svg");
-     _ships=[{ pos : [0  ,0    ],     prev :[.2  ,.3  ], color: "yellow", move:move},
-             { pos : [.5  ,.5  ],     prev :[.2  ,.3  ], color: "red", move:move},
-             { pos : [.4  ,.5  ],     prev :[.2  ,.3  ], color: "green", move:move},
-             { pos : [.001,0.83],     prev :[.2  ,.3  ], color: "blue", move:move},
-             { pos : [.03 ,.83 ],     prev :[.2  ,.3  ], color: "gray", move:move} ];
-      ships=_ships;
-//      ships=[_ships[1]];
+var s = Snap("#svg");
+_ships=[{ pos : [0  ,0    ],     prev :[.2  ,.3  ], color: "yellow", move:move},
+        { pos : [.5  ,.5  ],     prev :[.2  ,.3  ], color: "red", move:move},
+        { pos : [.4  ,.5  ],     prev :[.2  ,.3  ], color: "green", move:move},
+        { pos : [.001,0.83],     prev :[.2  ,.3  ], color: "blue", move:move},
+        { pos : [.03 ,.83 ],     prev :[.2  ,.3  ], color: "gray", move:move}
+       ];
+//ships=_ships;
+      ships=[_ships[1]];
 //      ships=[_ships[0],_ships[1]];
 
+planets=[{ pos : [.1  ,.3  ], size:10},
+         { pos : [.3  ,.1  ], size:10},
+         { pos : [.9  ,.7  ], size:10},
+         { pos : [.7  ,.9  ], size:10},
+         { pos : [.5  ,.5  ], size:10},
+         { pos : [.78  ,.86  ], size:10},
+         { pos : [.14  ,.23  ], size:10},
+         { pos : [.36  ,.48  ], size:10},
+         ];
+var width = document.getElementById('svg').offsetWidth;
+var height = document.getElementById('svg').offsetHeight;
+
+for(i=0;i<planets.length;i++){
+    planets[i].img=s.circle(planets[i].pos[0]*width, planets[i].pos[1]*height, planets[i].size*(Math.random()+.5));
+    planets[i].img.attr({
+        fill: "#bada55",
+        stroke: "#000",
+        strokeWidth: i
+    });
+}
 function move_ship(ship)
 {
     var t=new Snap.Matrix();
@@ -73,17 +94,39 @@ function move_ship(ship)
 
 function move_all(){
     for(i=0;i<ships.length;i++){
-        move_ship(ships[i]);
         ships[i].prev[0]=ships[i].pos[0]
         ships[i].prev[1]=ships[i].pos[1]
-        ships[i].pos[0]=(ships[i].pos[0] + .08*Math.random()) % 1
-        ships[i].pos[1]=(ships[i].pos[1] + .08*Math.random()) % 1
+        var dest = planets[Math.floor((Math.random() * planets.length))];
+        ships.planet=dest;
+        ships[i].pos[0]=dest.pos[0]-(dest.size/width);
+        ships[i].pos[1]=dest.pos[1]-(dest.size/height);
+        move_ship(ships[i]);
 
     }
 }
+function event_one(){
+    var width = document.getElementById('svg').offsetWidth;
+    var height = document.getElementById('svg').offsetHeight;
+    var ship = ships[Math.floor((Math.random() * ships.length))]
+    var fobject = '<foreignObject width="80" height="200"><body><p>'+ Math.floor((Math.random() * 2000))+ '</p></body></foreignObject>'
+    var sText = s.text(ships.planet.pos[0]*width, ships.planet.pos[1]*height, Math.floor((Math.random() * 2000))).attr({ fontSize: '100px', "text-anchor": "middle", "fill": ship.color });
+    var timing = 750;
+    Snap.animate( 0, 2, function( value ) {
+        if (value <1) {
+            sText.transform('t0,' + -20*value );                  // Animate by transform
+            sText.attr({ 'font-size': value * 20,  opacity: value });      // Animate by font-size
+        } else {
+            sText.transform('t0,' + -20*(2-value) );                  // Animate by transform
+            sText.attr({ 'font-size': (2-value) * 20,  opacity: (2-value) });      // Animate by font-size
+        }
+    }, timing, mina.elactic, function() { sText.remove() } );
 
+}
 
+move_all();
+event_one();
 </script>
-  <input type="button" value="event" onclick="move_all();"/>
+  <input type="button" value="move" onclick="move_all();"/>
+  <input type="button" value="event" onclick="event_one();"/>
   </body>
 </html>
