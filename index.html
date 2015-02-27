@@ -11,21 +11,42 @@
                 height: 100%;
             }
             #svg {
-                width: 100%;
+                width: 80%;
                 height: 90%;
                 border: solid 0px ;
                 margin: 0 0;
                 padding: 0 0;
-                background:url("space.jpg")  repeat; 
+                background:url("space.jpg")  repeat;
             }
+            #right {
+                position:relative;
+                float:right;
+           }
         </style>
   </head>
   <body >
-  <svg id="svg" >
-  <defs></defs>
-  </svg>
+    <svg id="svg" >
+        <defs></defs>
+    </svg >
+    <div id="right">
+        <div id="ranking">
+          <ul>
+            <li> first </li>
+            <li> second </li>
+            <li> third </li>
+            <li> forth </li>
+          </ul>
+        </div>
+        <canvas id="new-player"></canvas>
+    </div>
 <script type="text/javascript" src="snap.svg-min.js"></script>
+    <script type="text/javascript"  src="bower_components/qr-js/qr.min.js"></script>
 <script>
+qr.canvas({
+        canvas: document.getElementById('new-player'),
+        size : 10,
+        value: 'http://toromanoff.org/gameid/new_player'
+      });
 var Width = document.getElementById('svg').offsetWidth;
 var Height = document.getElementById('svg').offsetHeight;
 
@@ -96,7 +117,7 @@ function ship_lost(val){
     var timing = 800;
     Snap.animate( 0, 1, function( value ) {
         sText.transform('t0,'+ value*20 );
-	sText.attr({ 'opacity': 1-value });      // Animate by font-size
+        sText.attr({ 'opacity': 1-value });      // Animate by font-size
     }, timing, mina.easeout, function() { sText.remove() } );
 
 }
@@ -132,11 +153,11 @@ for(i=0;i<planets.length;i++){
 }
 function move_ship(ship, planet)
 {
-	ship.prev[0]=ship.pos[0];
+    ship.prev[0]=ship.pos[0];
     ship.prev[1]=ship.pos[1];
     ship.planet=planet;
     ship.angle=Snap.angle(planet.pos[0]*Width, planet.pos[1]*Height, ship.pos[0]*Width, ship.pos[1]*Height);
-	var angle=Snap.rad(ship.angle);
+    var angle=Snap.rad(ship.angle);
     ship.pos[0]=planet.pos[0]-planet.size*Math.cos(angle)/Width;
     ship.pos[1]=planet.pos[1]-planet.size*Math.sin(angle)/Height;
     var t=new Snap.Matrix();
@@ -163,12 +184,12 @@ function move_all(){
 
 function gain_all(){
     for(i=0;i<ships.length;i++){
-	    ships[i].gain(Math.floor((Math.random() * 2000)));
+        ships[i].gain(Math.floor((Math.random() * 2000)));
     }
 }
 function lost_all(){
     for(i=0;i<ships.length;i++){
-	    ships[i].lost(Math.floor((Math.random() * 1000)));
+        ships[i].lost(Math.floor((Math.random() * 1000)));
     }
 }
 
