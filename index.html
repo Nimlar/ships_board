@@ -61,7 +61,7 @@ function ship_move()
     var t=new Snap.Matrix();
     t.translate(x1, y1);
     t.rotate(this.angle,0,0);
-    this.img.animate({transform :t}, 1000);
+    this.img.animate({transform :t}, this.time);
 }
 function ship_gain(val){
 
@@ -151,17 +151,10 @@ for(i=0;i<planets.length;i++){
         strokeWidth: i
     });
 }
-function move_ship(ship, planet)
-{
-    ship.prev[0]=ship.pos[0];
-    ship.prev[1]=ship.pos[1];
-    ship.planet=planet;
-    ship.angle=Snap.angle(planet.pos[0]*Width, planet.pos[1]*Height, ship.pos[0]*Width, ship.pos[1]*Height);
-    var angle=Snap.rad(ship.angle);
-    ship.pos[0]=planet.pos[0]-planet.size*Math.cos(angle)/Width;
-    ship.pos[1]=planet.pos[1]-planet.size*Math.sin(angle)/Height;
-    var t=new Snap.Matrix();
 
+
+function move_ship(ship)
+{
     if (ship.img === undefined) {
         Snap.load("fleche.svg", function(e) {
             var f=e.select("g"); /* get the internal data of svg */
@@ -175,10 +168,37 @@ function move_ship(ship, planet)
     }
 }
 
+
+function ship_to_planet(ship, planet)
+{
+    ship.prev[0]=ship.pos[0];
+    ship.prev[1]=ship.pos[1];
+    ship.planet=planet;
+
+    ship.angle=Snap.angle(planet.pos[0]*Width, planet.pos[1]*Height, ship.prev[0]*Width, ship.prev[1]*Height);
+    var angle=Snap.rad(ship.angle);
+    ship.pos[0]=planet.pos[0]-planet.size*Math.cos(angle)/Width;
+    ship.pos[1]=planet.pos[1]-planet.size*Math.sin(angle)/Height;
+    ship.time = 1000;
+
+    move_ship(ship);
+}
+
+function rotate_ship(ship)
+{
+    ship.angle+=30;
+    var angle=Snap.rad(ship.angle);
+    ship.pos[0]=ship.planet.pos[0]-ship.planet.size*Math.cos(angle)/Width;
+    ship.pos[1]=ship.planet.pos[1]-ship.planet.size*Math.sin(angle)/Height;
+    ship.time=100;
+    move_ship(ship);
+
+}
+
 function move_all(){
     for(i=0;i<ships.length;i++){
         var dest = planets[Math.floor((Math.random() * planets.length))];
-        move_ship(ships[i], dest);
+        ship_to_planet(ships[i], dest);
     }
 }
 
@@ -193,12 +213,16 @@ function lost_all(){
     }
 }
 
+
+
 move_all();
+
 //event_one();
 </script>
   <input type="button" value="move" onclick="move_all();"/>
   <input type="button" value="gain" onclick="gain_all();"/>
   <input type="button" value="lost" onclick="lost_all();"/>
   <input type="button" value="both" onclick="lost_all(); gain_all();"/>
+  <input type="button" value="rotatate" onclick="rotate_ship(ships[0]);"/>
   </body>
 </html>
