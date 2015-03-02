@@ -123,14 +123,14 @@ function ship_lost(val){
 }
 
 var s = Snap("#svg");
-_ships=[{ pos : [0  ,0    ],     prev :[.2  ,.3  ], color: "yellow", move:ship_move, gain:ship_gain, lost:ship_lost},
-        { pos : [.5  ,.5  ],     prev :[.2  ,.3  ], color: "red", move:ship_move, gain:ship_gain, lost:ship_lost},
+_ships=[{ pos : [0  ,0    ],     prev :[.2  ,.3  ], color: "red", move:ship_move, gain:ship_gain, lost:ship_lost},
+        { pos : [.5  ,.5  ],     prev :[.2  ,.3  ], color: "yellow", move:ship_move, gain:ship_gain, lost:ship_lost},
         { pos : [.4  ,.5  ],     prev :[.2  ,.3  ], color: "green", move:ship_move, gain:ship_gain, lost:ship_lost},
         { pos : [.001,0.83],     prev :[.2  ,.3  ], color: "blue", move:ship_move, gain:ship_gain, lost:ship_lost},
         { pos : [.03 ,.83 ],     prev :[.2  ,.3  ], color: "gray", move:ship_move, gain:ship_gain, lost:ship_lost}
        ];
 ships=_ships;
-//      ships=[_ships[1]];
+//      ships=[_ships[0]];
 //      ships=[_ships[0],_ships[1]];
 
 planets=[{ pos : [.1  ,.3  ], size:10},
