@@ -6,9 +6,23 @@ qr.canvas({
 var Width = document.getElementById('svg').offsetWidth;
 var Height = document.getElementById('svg').offsetHeight;
 
-function ship_move()
+
+function Ships( x , y, color)
 {
-    //console.log(JSON.stringify(this), ["img"], 4);
+    this.pos=[x,y];
+    this.prev=[x,y];
+    this.color=color;
+
+    Snap.load("fleche.svg", function(e) {
+            var f=e.select("g"); /* get the internal data of svg */
+            f.select("#center").attr({fill: this.color});
+            s.append(f);
+            this.img=f;
+    }, this);
+}
+
+Ships.prototype.move = function()
+{
     var x0=this.prev[0]*Width;
     var y0=this.prev[1]*Height;
     var x1=this.pos[0]*Width;
@@ -19,8 +33,8 @@ function ship_move()
     t.rotate(this.angle,0,0);
     this.img.animate({transform :t}, this.time, mina.linear);
 }
-function ship_gain(val){
 
+Ships.prototype.gain = function(val){
     var sText = s.text(0, 0, val).attr({ fontSize: '100px', "text-anchor": "middle", "fill": this.color });
 
     /* create the path to follow while animation */
@@ -61,9 +75,7 @@ function ship_gain(val){
     }, timing, mina.elactic, function() { sText.remove() } );
 
 }
-function ship_lost(val){
-
-
+Ships.prototype.lost = function(val){
     /* create the path to follow while animation */
     var bbox=this.img.getBBox();
     p1x=bbox.cx;
@@ -78,16 +90,42 @@ function ship_lost(val){
 
 }
 
+Ships.prototype.to_planet = function(planet)
+{
+    this.prev[0]=this.pos[0];
+    this.prev[1]=this.pos[1];
+    this.planet=planet;
+
+    this.angle=Snap.angle(planet.pos[0]*Width, planet.pos[1]*Height, this.prev[0]*Width, this.prev[1]*Height);
+    var angle=Snap.rad(this.angle);
+    this.pos[0]=planet.pos[0]-planet.size*Math.cos(angle)/Width;
+    this.pos[1]=planet.pos[1]-planet.size*Math.sin(angle)/Height;
+    this.time = 1000;
+
+//    this.move();
+}
+
+Ships.prototype.rotate = function()
+{
+    this.angle+=10;
+    var angle=Snap.rad(this.angle);
+    this.pos[0]=this.planet.pos[0]-this.planet.size*Math.cos(angle)/Width;
+    this.pos[1]=this.planet.pos[1]-this.planet.size*Math.sin(angle)/Height;
+    this.time=100+Math.floor(Math.random() *200);
+//    this.move();
+}
+
+
 var s = Snap("#svg");
-_ships=[{ pos : [0  ,0    ],     prev :[.2  ,.3  ], color: "red", move:ship_move, gain:ship_gain, lost:ship_lost},
-        { pos : [.5  ,.5  ],     prev :[.2  ,.3  ], color: "yellow", move:ship_move, gain:ship_gain, lost:ship_lost},
-        { pos : [.4  ,.5  ],     prev :[.2  ,.3  ], color: "green", move:ship_move, gain:ship_gain, lost:ship_lost},
-        { pos : [.001,0.83],     prev :[.2  ,.3  ], color: "blue", move:ship_move, gain:ship_gain, lost:ship_lost},
-        { pos : [.03 ,.83 ],     prev :[.2  ,.3  ], color: "gray", move:ship_move, gain:ship_gain, lost:ship_lost}
+_ships=[new Ships( 0  ,0    , "red"),
+        new Ships(.5  ,.5   , "yellow"),
+        new Ships(.4  ,.5   , "green"),
+        new Ships(.001,0.83 , "blue"),
+        new Ships(.03 ,.83  , "gray")
        ];
-//ships=_ships;
-      ships=[_ships[0]];
-//      ships=[_ships[0],_ships[1]];
+ships=_ships;
+//      ships=[_ships[4]];
+//      ships=[_ships[1],_ships[4]];
 
 planets=[{ pos : [.1  ,.3  ], size:10},
          { pos : [.3  ,.1  ], size:10},
@@ -109,54 +147,27 @@ for(i=0;i<planets.length;i++){
 }
 
 
-function move_ship(ship)
-{
-    if (ship.img === undefined) {
-        Snap.load("fleche.svg", function(e) {
-            var f=e.select("g"); /* get the internal data of svg */
-            f.select("#center").attr({fill: this.color});
-            s.append(f);
-            this.img=f;
-            this.move();
-        }, ship);
-    } else {
-        ship.move()
-    }
-}
-
-
-function ship_to_planet(ship, planet)
-{
-    ship.prev[0]=ship.pos[0];
-    ship.prev[1]=ship.pos[1];
-    ship.planet=planet;
-
-    ship.angle=Snap.angle(planet.pos[0]*Width, planet.pos[1]*Height, ship.prev[0]*Width, ship.prev[1]*Height);
-    var angle=Snap.rad(ship.angle);
-    ship.pos[0]=planet.pos[0]-planet.size*Math.cos(angle)/Width;
-    ship.pos[1]=planet.pos[1]-planet.size*Math.sin(angle)/Height;
-    ship.time = 1000;
-//    cb=(function(){ return function() { rotate_ship(ship, cb) }; })();
-    move_ship(ship);
-}
-
-function rotate_ship(ship)
-{
-    ship.angle+=10;
-    var angle=Snap.rad(ship.angle);
-    ship.pos[0]=ship.planet.pos[0]-ship.planet.size*Math.cos(angle)/Width;
-    ship.pos[1]=ship.planet.pos[1]-ship.planet.size*Math.sin(angle)/Height;
-    ship.time=100+Math.floor(Math.random() *100);
-    move_ship(ship);
-}
-
 function move_all(){
     for(i=0;i<ships.length;i++){
         var dest = planets[Math.floor((Math.random() * planets.length))];
-        ship_to_planet(ships[i], dest);
+        ships[i].to_planet(dest);
+        ships[i].move();
+    }
+}
+function rotate_all(){
+    for(i=0;i<ships.length;i++){
+        var dest = planets[Math.floor((Math.random() * planets.length))];
+        ships[i].rotate();
+        ships[i].move();
     }
 }
 
+function apply_all(){
+    for(i=0;i<ships.length;i++){
+        var dest = planets[Math.floor((Math.random() * planets.length))];
+        ships[i].move();
+    }
+}
 function gain_all(){
     for(i=0;i<ships.length;i++){
         ships[i].gain(Math.floor((Math.random() * 2000)));
