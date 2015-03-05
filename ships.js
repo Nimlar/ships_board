@@ -13,16 +13,34 @@ function Ships( x , y, color)
     this.prev=[x,y];
     this.color=color;
 
-    Snap.load("fleche.svg", function(e) {
-            var f=e.select("g"); /* get the internal data of svg */
-            f.select("#center").attr({fill: this.color});
-            s.append(f);
-            this.img=f;
-    }, this);
 }
 
+Ships.prototype.prepare_move = function()
+{
+    //console.log("prepare move "+ this.color);
+    if (this.next_planet!=this.planet)
+    {
+        this.to_planet(this.next_planet);
+    }else {
+        this.rotate();
+    }
+    if (this.img === undefined) {
+        var that=this;
+        Snap.load("fleche.svg", 
+           function(e) {
+                var f=e.select("g"); /* get the internal data of svg */
+                f.select("#center").attr({fill: this.color});
+                s.append(f);
+                this.img=f;
+                this.move();
+           }, this);
+    } else {
+        this.move();
+    }
+}
 Ships.prototype.move = function()
 {
+    //console.log("move "+ this.color);
     var x0=this.prev[0]*Width;
     var y0=this.prev[1]*Height;
     var x1=this.pos[0]*Width;
@@ -31,7 +49,8 @@ Ships.prototype.move = function()
     var t=new Snap.Matrix();
     t.translate(x1, y1);
     t.rotate(this.angle,0,0);
-    this.img.animate({transform :t}, this.time, mina.linear);
+    that=this;
+    this.img.animate({transform :t}, this.time, mina.linear, that.prepare_move.bind(that));
 }
 
 Ships.prototype.gain = function(val){
@@ -92,27 +111,27 @@ Ships.prototype.lost = function(val){
 
 Ships.prototype.to_planet = function(planet)
 {
+    //console.log("to planet "+ this.color);
     this.prev[0]=this.pos[0];
     this.prev[1]=this.pos[1];
     this.planet=planet;
+    this.next_planet=planet;
 
     this.angle=Snap.angle(planet.pos[0]*Width, planet.pos[1]*Height, this.prev[0]*Width, this.prev[1]*Height);
     var angle=Snap.rad(this.angle);
     this.pos[0]=planet.pos[0]-planet.size*Math.cos(angle)/Width;
     this.pos[1]=planet.pos[1]-planet.size*Math.sin(angle)/Height;
     this.time = 1000;
-
-//    this.move();
 }
 
 Ships.prototype.rotate = function()
 {
+    //console.log("rotate "+ this.color);
     this.angle+=10;
     var angle=Snap.rad(this.angle);
     this.pos[0]=this.planet.pos[0]-this.planet.size*Math.cos(angle)/Width;
     this.pos[1]=this.planet.pos[1]-this.planet.size*Math.sin(angle)/Height;
-    this.time=100+Math.floor(Math.random() *200);
-//    this.move();
+    this.time=100+Math.floor(Math.random() *400);
 }
 
 
@@ -150,22 +169,13 @@ for(i=0;i<planets.length;i++){
 function move_all(){
     for(i=0;i<ships.length;i++){
         var dest = planets[Math.floor((Math.random() * planets.length))];
-        ships[i].to_planet(dest);
-        ships[i].move();
-    }
-}
-function rotate_all(){
-    for(i=0;i<ships.length;i++){
-        var dest = planets[Math.floor((Math.random() * planets.length))];
-        ships[i].rotate();
-        ships[i].move();
+        ships[i].next_planet=dest;
     }
 }
 
 function apply_all(){
     for(i=0;i<ships.length;i++){
-        var dest = planets[Math.floor((Math.random() * planets.length))];
-        ships[i].move();
+        ships[i].prepare_move();
     }
 }
 function gain_all(){

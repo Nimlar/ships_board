@@ -24,9 +24,13 @@
                 /*background:url("space.jpg")  repeat;*/
             }
             #right {
+                height: 90%;
                 position:relative;
                 float:right;
-           }
+            }
+            #new-player {
+                position:bottom;
+            }
         </style>
   </head>
   <body >
@@ -47,16 +51,20 @@
     </div>
   <div>
   <input type="button" value="move" onclick="move_all();"/>
+  <input type="button" value="apply" onclick="apply_all();"/>
   <input type="button" value="gain" onclick="gain_all();"/>
   <input type="button" value="lost" onclick="lost_all();"/>
   <input type="button" value="both" onclick="lost_all(); gain_all();"/>
-  <input type="button" value="rotate" onclick="rotate_all();"/>
-  <input type="button" value="apply" onclick="apply_all();"/>
   </div>
   </div>
     <script src="ships.js"></script>
     <script>
-        move_all();
+        var dest = planets[Math.floor((Math.random() * planets.length))];
+    for(i=0;i<ships.length;i++){
+        ships[i].next_planet=dest;
+    }
+
+        apply_all();
     </script>
 </body>
 </html>
